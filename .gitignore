@@ -1,0 +1,13 @@
+# Archivos de sistema (Mac y Windows)
+.DS_Store
+Thumbs.db
+
+# Dependencias (Se regeneran, no se suben)
+/vendor/
+/node_modules/
+
+# Archivos de entorno y seguridad (¡Muy importante!)
+.env
+
+# Logs y errores
+*.log
