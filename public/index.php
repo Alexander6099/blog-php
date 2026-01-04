@@ -1,6 +1,15 @@
 <?php
 session_start();
 require_once '../config/database.php';
+require_once '../src/controllers/PostController.php';
+
+$postController = new PostController($conexion);
+$posts = $postController->obtenerTodos();
+$termino = $_GET['buscar'] ?? '';
+
+if ($termino) {
+    $posts = $postController->buscar($termino);
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -13,7 +22,7 @@ require_once '../config/database.php';
 <body class="bg-gray-50">
     <nav class="bg-white shadow-md">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600">Mi Blog</h1>
+            <a href="index.php" class="text-2xl font-bold text-blue-600">Mi Blog</a>
             <div class="space-x-4">
                 <?php if (isset($_SESSION['usuario_id'])): ?>
                     <span class="text-gray-700">Hola, <?= htmlspecialchars($_SESSION['usuario_nombre']) ?></span>
@@ -28,8 +37,55 @@ require_once '../config/database.php';
     </nav>
     
     <div class="max-w-6xl mx-auto px-4 py-8">
-        <h2 class="text-3xl font-bold mb-6">Últimos Posts</h2>
-        <p class="text-gray-600">Los posts aparecerán aquí próximamente...</p>
+        <h1 class="text-4xl font-bold mb-8">Últimos Posts</h1>
+        
+        <!-- Búsqueda -->
+        <form method="GET" class="mb-8">
+            <div class="flex gap-2">
+                <input type="text" name="buscar" placeholder="Buscar posts..." value="<?= htmlspecialchars($termino) ?>"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Buscar
+                </button>
+                <?php if ($termino): ?>
+                    <a href="index.php" class="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500">
+                        Limpiar
+                    </a>
+                <?php endif; ?>
+            </div>
+        </form>
+        
+        <!-- Posts -->
+        <?php if (empty($posts)): ?>
+            <p class="text-gray-600 text-center py-8">No hay posts disponibles</p>
+        <?php else: ?>
+            <div class="grid gap-6">
+                <?php foreach ($posts as $post): ?>
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                        <h2 class="text-2xl font-bold mb-2">
+                            <a href="ver-post.php?id=<?= $post['id'] ?>" class="text-blue-600 hover:underline">
+                                <?= htmlspecialchars($post['titulo']) ?>
+                            </a>
+                        </h2>
+                        <p class="text-gray-600 mb-3">Por <?= htmlspecialchars($post['autor']) ?> • <?= date('d/m/Y', strtotime($post['fecha_creacion'])) ?></p>
+                        <?php if ($post['categoria']): ?>
+                            <p class="mb-3">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                                    <?= htmlspecialchars($post['categoria']) ?>
+                                </span>
+                            </p>
+                        <?php endif; ?>
+                        <p class="text-gray-700 mb-4">
+                            <?= substr(htmlspecialchars($post['contenido']), 0, 200) ?>...
+                        </p>
+                        <a href="ver-post.php?id=<?= $post['id'] ?>" class="text-blue-600 hover:underline font-medium">
+                            Leer más →
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>
+

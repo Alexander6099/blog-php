@@ -1,5 +1,10 @@
 <?php
+// Habilitar la visualización de errores para depuración
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);   
+error_reporting(E_ALL);
 
+// config/database.php
 define('BD_HOST', 'localhost');
 define('BD_USER', 'root');
 define('BD_PASS', '');

@@ -34,7 +34,7 @@ class AuthController {
             $resultado = $this->usuarioModel->registrar($nombre, $email, $password);
             
             if ($resultado['éxito']) {
-                header('Location: login.php?mensaje=Registro exitoso');
+                header('Location: ../public/login.php?mensaje=Registro exitoso');
                 exit;
             } else {
                 return ['error' => $resultado['mensaje']];
@@ -58,7 +58,7 @@ class AuthController {
             if ($resultado['éxito']) {
                 $_SESSION['usuario_id'] = $resultado['usuario']['id'];
                 $_SESSION['usuario_nombre'] = $resultado['usuario']['nombre'];
-                header('Location: ../index.php');
+                header('Location: ../public/index.php');
                 exit;
             } else {
                 return ['error' => $resultado['mensaje']];
