@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/database.php';
 require_once '../src/controllers/PostController.php';
+require_once '../src/controllers/ComentarioController.php';
 
 $id = $_GET['id'] ?? null;
 
@@ -24,6 +25,20 @@ if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_id'] == $post['autor_id
     
     $error = $postController->actualizar();
 }
+// Manejar nuevo comentario
+$errorComentario = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'comentar') {
+    $comentarioController = new ComentarioController($conexion);
+    $errorComentario = $comentarioController->crear();
+    if ($errorComentario && $errorComentario['éxito']) {
+        header('Location: ver-post.php?id=' . $id);
+        exit;
+    }
+}
+
+// Obtener comentarios
+$comentarioController = new ComentarioController($conexion);
+$comentarios = $comentarioController->obtenerPorPost($id);
 
 $puedoEditar = isset($_SESSION['usuario_id']) && $_SESSION['usuario_id'] == $post['autor_id'];
 $modoEdicion = $puedoEditar && isset($_GET['editar']);
@@ -135,6 +150,68 @@ $categorias = $postController->obtenerCategorias();
                 </div>
             </article>
         <?php endif; ?>
+        <!-- Sección de comentarios -->
+        <div class="bg-white rounded-lg shadow-md p-8 mt-8">
+            <h2 class="text-2xl font-bold mb-6">Comentarios (<?= count($comentarios) ?>)</h2>
+            
+            <?php if (isset($_SESSION['usuario_id'])): ?>
+                <!-- Formulario para nuevo comentario -->
+                <form method="POST" class="mb-8 pb-8 border-b">
+                    <input type="hidden" name="accion" value="comentar">
+                    <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
+                    
+                    <?php if (isset($errorComentario['error'])): ?>
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                            <?= htmlspecialchars($errorComentario['error']) ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="mb-4">
+                        <label for="contenido_comentario" class="block text-sm font-medium text-gray-700 mb-2">Tu comentario</label>
+                        <textarea name="contenido" id="contenido_comentario" rows="4" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Escribe tu comentario aquí..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Comentar
+                    </button>
+                </form>
+            <?php else: ?>
+                <div class="mb-8 pb-8 border-b bg-blue-50 p-4 rounded">
+                    <p class="text-gray-700">
+                        <a href="login.php" class="text-blue-600 hover:underline">Inicia sesión</a> para comentar
+                    </p>
+                </div>
+            <?php endif; ?>
+            
+            <!-- Lista de comentarios -->
+            <?php if (empty($comentarios)): ?>
+                <p class="text-gray-600 text-center py-8">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+            <?php else: ?>
+                <div class="space-y-6">
+                    <?php foreach ($comentarios as $comentario): ?>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="font-bold text-gray-900"><?= htmlspecialchars($comentario['usuario']) ?></p>
+                                    <p class="text-sm text-gray-500"><?= date('d/m/Y H:i', strtotime($comentario['fecha_comentario'])) ?></p>
+                                </div>
+                                
+                                <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_id'] == $comentario['usuario_id']): ?>
+                                    <a href="eliminar-comentario.php?id=<?= $comentario['id'] ?>&post_id=<?= $post['id'] ?>" 
+                                       onclick="return confirm('¿Eliminar comentario?')" 
+                                       class="text-red-600 hover:text-red-800 text-sm">
+                                        Eliminar
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                            <p class="text-gray-700"><?= nl2br(htmlspecialchars($comentario['contenido'])) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 
