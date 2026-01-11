@@ -13,6 +13,7 @@ if ($termino) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +28,7 @@ if ($termino) {
             <div class="space-x-4">
                 <?php if (isset($_SESSION['usuario_id'])): ?>
                     <span class="text-gray-700">Hola, <?= htmlspecialchars($_SESSION['usuario_nombre']) ?></span>
+                    <a href="admin.php" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Admin</a>
                     <a href="crear-post.php" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Nuevo Post</a>
                     <a href="../src/controllers/logout.php" class="text-red-600 hover:underline">Logout</a>
                 <?php else: ?>
@@ -36,10 +38,10 @@ if ($termino) {
             </div>
         </div>
     </nav>
-    
+
     <div class="max-w-6xl mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold mb-8">Últimos Posts</h1>
-        
+
         <!-- Búsqueda -->
         <form method="GET" class="mb-8">
             <div class="flex gap-2">
@@ -55,7 +57,7 @@ if ($termino) {
                 <?php endif; ?>
             </div>
         </form>
-        
+
         <!-- Posts -->
         <?php if (empty($posts)): ?>
             <p class="text-gray-600 text-center py-8">No hay posts disponibles</p>
@@ -88,5 +90,5 @@ if ($termino) {
         <?php endif; ?>
     </div>
 </body>
-</html>
 
+</html>
